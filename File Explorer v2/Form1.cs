@@ -22,7 +22,7 @@ namespace File_Explorer_v2
         }
 
         // Построение списка файлов/папок        
-        private void Fill_listviewFolders(string path, ListView list)
+        private static void Fill_listviewFolders(string path, ListView list)
         {
             list.Clear();
             var lv = Build.BuildColumnHeaders(list);
@@ -61,7 +61,7 @@ namespace File_Explorer_v2
             }
         }
 
-        private void Fill_listviewFiles(string path, ListView list)
+        private static void Fill_listviewFiles(string path, ListView list)
         {
             var directory = new DirectoryInfo(path);
 
@@ -120,13 +120,15 @@ namespace File_Explorer_v2
             var sPoint = 0;
             foreach (var ld in sDi)
             {
-                var ldButton = new Button();
-                ldButton.Location = new Point(sPoint, 2);
-                ldButton.Name = ld.Name;
-                ldButton.Size = new Size(30, 20);
-                ldButton.TabIndex = 3;
-                ldButton.Text = ld.Name;
-                ldButton.UseVisualStyleBackColor = true;
+                var ldButton = new Button
+                {
+                    Location = new Point(sPoint, 2),
+                    Name = ld.Name,
+                    Size = new Size(30, 20),
+                    TabIndex = 3,
+                    Text = ld.Name,
+                    UseVisualStyleBackColor = true
+                };
                 ldButton.Font = new Font(ldButton.Font.FontFamily, 7);
                 ldButton.Click += DriveChange;
                 ldButton.Tag = pnl.Name;
@@ -148,22 +150,22 @@ namespace File_Explorer_v2
         private void listView_left_ItemActivate(object sender, EventArgs e)
         {
             label1.Text = Settings.Default.LeftPath;
-            var LeftNOTChangedPath = Settings.Default.LeftPath;
-            var Changed = listView_left.FocusedItem.Text;
-            var LeftChangedPath = Build.PrepareLocalPath(Settings.Default.LeftPath, Changed);
+            var leftNotChangedPath = Settings.Default.LeftPath;
+            var changed = listView_left.FocusedItem.Text;
+            var leftChangedPath = Build.PrepareLocalPath(Settings.Default.LeftPath, changed);
 
             try
             {
-                if (Path.GetExtension(LeftChangedPath) == "")
+                if (Path.GetExtension(leftChangedPath) == "")
                 {
-                    Fill_listviewFolders(LeftChangedPath, listView_left);
-                    Fill_listviewFiles(LeftChangedPath, listView_left);
-                    Settings.Default.LeftPath = LeftChangedPath;
+                    Fill_listviewFolders(leftChangedPath, listView_left);
+                    Fill_listviewFiles(leftChangedPath, listView_left);
+                    Settings.Default.LeftPath = leftChangedPath;
                 }
                 else
                 {
-                    Process.Start(LeftChangedPath);
-                    Settings.Default.LeftPath = LeftNOTChangedPath;
+                    Process.Start(leftChangedPath);
+                    Settings.Default.LeftPath = leftNotChangedPath;
                 }
 
                 label1.Text = Settings.Default.LeftPath;
@@ -176,22 +178,22 @@ namespace File_Explorer_v2
 
         private void listView_right_ItemActivate(object sender, EventArgs e)
         {
-            var RigthNOTChangedPath = Settings.Default.RightPath;
-            var Changed = listView_right.FocusedItem.Text;
-            var RigthChangedPath = Build.PrepareLocalPath(Settings.Default.RightPath, Changed);
-            Settings.Default.RightPath = RigthChangedPath;
+            var rigthNotChangedPath = Settings.Default.RightPath;
+            var changed = listView_right.FocusedItem.Text;
+            var rigthChangedPath = Build.PrepareLocalPath(Settings.Default.RightPath, changed);
+            Settings.Default.RightPath = rigthChangedPath;
             try
             {
-                if (Path.GetExtension(RigthChangedPath) == "")
+                if (Path.GetExtension(rigthChangedPath) == "")
                 {
-                    Fill_listviewFolders(RigthChangedPath, listView_right);
-                    Fill_listviewFiles(RigthChangedPath, listView_right);
-                    Settings.Default.RightPath = RigthChangedPath;
+                    Fill_listviewFolders(rigthChangedPath, listView_right);
+                    Fill_listviewFiles(rigthChangedPath, listView_right);
+                    Settings.Default.RightPath = rigthChangedPath;
                 }
                 else
                 {
-                    Process.Start(RigthChangedPath);
-                    Settings.Default.RightPath = RigthNOTChangedPath;
+                    Process.Start(rigthChangedPath);
+                    Settings.Default.RightPath = rigthNotChangedPath;
                 }
             }
             catch
@@ -206,13 +208,13 @@ namespace File_Explorer_v2
     internal class Build
     {
         // подготовка локального пути
-        public static string PrepareLocalPath(string path, string Changed)
+        public static string PrepareLocalPath(string path, string changed)
         {
-            string ChangedPath;
+            string changedPath;
             var directory = new DirectoryInfo(path);
-            if (Changed == "...")
+            if (changed == "...")
             {
-                ChangedPath = directory.Parent.FullName;
+                changedPath = directory.Parent.FullName;
             }
             else
             {
@@ -220,10 +222,10 @@ namespace File_Explorer_v2
 
                 if (directory.Root.ToString() != directory.FullName) addSlashes = "\\";
 
-                ChangedPath = directory.FullName + addSlashes + Changed;
+                changedPath = directory.FullName + addSlashes + changed;
             }
 
-            return ChangedPath;
+            return changedPath;
         }
 
         // Построение колонок
@@ -231,25 +233,15 @@ namespace File_Explorer_v2
         {
             var columns = new ColumnHeader[5];
 
-            columns[0] = new ColumnHeader();
-            columns[0].Text = "Файл";
-            columns[0].Width = 200;
+            columns[0] = new ColumnHeader {Text = "Файл", Width = 200};
 
-            columns[1] = new ColumnHeader();
-            columns[1].Text = "Тип";
-            columns[1].Width = 40;
+            columns[1] = new ColumnHeader {Text = "Тип", Width = 40};
 
-            columns[2] = new ColumnHeader();
-            columns[2].Text = "Размер";
-            columns[2].Width = 60;
+            columns[2] = new ColumnHeader {Text = "Размер", Width = 60};
 
-            columns[3] = new ColumnHeader();
-            columns[3].Text = "Дата";
-            columns[3].Width = 100;
+            columns[3] = new ColumnHeader {Text = "Дата", Width = 100};
 
-            columns[4] = new ColumnHeader();
-            columns[4].Text = "Путь";
-            columns[4].Width = 200;
+            columns[4] = new ColumnHeader {Text = "Путь", Width = 200};
 
             lv.Columns.AddRange(columns);
 
