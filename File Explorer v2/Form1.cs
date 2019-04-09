@@ -99,11 +99,16 @@ namespace File_Explorer_v2
             try
             {
                 if (nP == "DiskLeftPanel")
+                {
                     Settings.Default.LeftPath = ((Button) sender).Name;
+                    label1.Text = Settings.Default.LeftPath;
+                }
 
-                if (nP == "DiskRightPanel")
-                    Settings.Default.RightPath = ((Button) sender).Name;
-
+                {
+                    if (nP == "DiskRightPanel")
+                        Settings.Default.RightPath = ((Button) sender).Name;
+                    label2.Text = Settings.Default.RightPath;
+                }
                 Reload();
             }
             catch

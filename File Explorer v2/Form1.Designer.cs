@@ -49,7 +49,6 @@
             this.DiskLeftPanel = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
             this.contextMenuStrip_Listview.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -110,14 +109,14 @@
             // toolStripMenuItem_copy
             // 
             this.toolStripMenuItem_copy.Name = "toolStripMenuItem_copy";
-            this.toolStripMenuItem_copy.Size = new System.Drawing.Size(261, 24);
+            this.toolStripMenuItem_copy.Size = new System.Drawing.Size(162, 24);
             this.toolStripMenuItem_copy.Text = "Копировать";
             this.toolStripMenuItem_copy.Click += new System.EventHandler(this.toolStripMenuItem_copy_Click);
             // 
             // ToolStripMenuItem_paste
             // 
             this.ToolStripMenuItem_paste.Name = "ToolStripMenuItem_paste";
-            this.ToolStripMenuItem_paste.Size = new System.Drawing.Size(261, 24);
+            this.ToolStripMenuItem_paste.Size = new System.Drawing.Size(162, 24);
             this.ToolStripMenuItem_paste.Text = "Вставить";
             this.ToolStripMenuItem_paste.Click += new System.EventHandler(this.ToolStripMenuItem_paste_Click);
             // 
@@ -194,36 +193,26 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(138, 13);
+            this.label1.Location = new System.Drawing.Point(12, 13);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(46, 17);
+            this.label1.Size = new System.Drawing.Size(25, 17);
             this.label1.TabIndex = 5;
-            this.label1.Text = "label1";
+            this.label1.Text = "C:\\";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(528, 13);
+            this.label2.Location = new System.Drawing.Point(488, 13);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(46, 17);
+            this.label2.Size = new System.Drawing.Size(25, 17);
             this.label2.TabIndex = 6;
-            this.label2.Text = "label2";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(223, 13);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(46, 17);
-            this.label3.TabIndex = 7;
-            this.label3.Text = "label3";
+            this.label2.Text = "C:\\";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(971, 515);
-            this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.DiskLeftPanel);
@@ -264,7 +253,6 @@
         private System.Windows.Forms.ColumnHeader PathFr;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
     }
 }
 
