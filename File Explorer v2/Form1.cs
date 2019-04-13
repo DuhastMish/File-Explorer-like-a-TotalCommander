@@ -17,6 +17,10 @@ namespace File_Explorer_v2
         public string FileName; //Имя файла
         public string ToDir; //Путь вставки файла
         public string FromDir; //Путь копирования файла
+        public string BeforeChangedDiskRight;
+        public string BeforeChangedDiskLeft;
+        bool ActiveListView_Left;
+        bool ActiveListView_Right;
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -26,7 +30,6 @@ namespace File_Explorer_v2
             ButtonDisks(DiskLeftPanel);
         }
 
-        // Построение списка файлов/папок        
         private static void Fill_listviewFolders(string path, ListView list)
         {
             list.Clear();
@@ -109,21 +112,36 @@ namespace File_Explorer_v2
             {
                 if (nP == "DiskLeftPanel")
                 {
+                    BeforeChangedDiskLeft = Settings.Default.LeftPath;
                     Settings.Default.LeftPath = ((Button) sender).Name;
                     label1.Text = Settings.Default.LeftPath;
+                    ReloadLeft();
                 }
-                {
-                    if (nP == "DiskRightPanel")
-                        Settings.Default.RightPath = ((Button) sender).Name;
-                    label2.Text = Settings.Default.RightPath;
-                }
-                ReloadLeft();
-                ReloadRight();
             }
             catch
             {
                 MessageBox.Show("Вставьте диск!",
                     "Внимание!");
+                Settings.Default.LeftPath = BeforeChangedDiskLeft;
+                ReloadLeft();
+            }
+
+            try
+            {
+                if (nP == "DiskRightPanel")
+                {
+                    BeforeChangedDiskRight = Settings.Default.RightPath;
+                    Settings.Default.RightPath = ((Button) sender).Name;
+                    label2.Text = Settings.Default.RightPath;
+                    ReloadRight();
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Вставьте диск!",
+                    "Внимание!");
+                Settings.Default.RightPath = BeforeChangedDiskRight;
+                ReloadRight();
             }
         }
 
@@ -159,14 +177,15 @@ namespace File_Explorer_v2
                 string s2 = ToDir + "\\" + Path.GetFileName(s1);
                 File.Copy(s1, s2);
             }
+
             foreach (string s in Directory.GetDirectories(FromDir))
             {
                 CopyDir(s, ToDir + "\\" + Path.GetFileName(s));
             }
         }
+
         private void listView_left_ItemActivate(object sender, EventArgs e)
         {
-            label1.Text = Settings.Default.LeftPath;
             var leftNotChangedPath = Settings.Default.LeftPath;
             var changed = listView_left.FocusedItem.Text;
             var leftChangedPath = Build.PrepareLocalPath(Settings.Default.LeftPath, changed);
@@ -191,7 +210,10 @@ namespace File_Explorer_v2
             {
                 MessageBox.Show("Данный файл не может быть открыт");
             }
+
+            label1.Text = Settings.Default.LeftPath;
         }
+
         private void listView_right_ItemActivate(object sender, EventArgs e)
         {
             var rigthNotChangedPath = Settings.Default.RightPath;
@@ -219,87 +241,167 @@ namespace File_Explorer_v2
 
             label2.Text = Settings.Default.RightPath;
         }
-        private void ToolStripMenuItemLeft_paste_Click(object sender, EventArgs e)
+
+        private void button_move_Click(object sender, EventArgs e)
         {
-            ToDir = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName);
             try
             {
-                if (Path.GetExtension(FromDir) == "")
+                if (ActiveListView_Left)
                 {
-                    CopyDir(FromDir, ToDir);
-                    //MessageBox.Show("выбрана папка");
+                    ToDir = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName);
+                    if (Path.GetExtension(FromDir) == "")
+                    {
+                        Directory.Move(FromDir, ToDir);
+                    }
+                    else
+                    {
+                        File.Move(FromDir, ToDir);
+                    }
+
+                    ReloadLeft();
+                    ReloadRight();
                 }
                 else
                 {
-                    File.Copy(FromDir, ToDir, true);
+                    if (ActiveListView_Right)
+                    {
+                        ToDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
+                        if (Path.GetExtension(FromDir) == "")
+                        {
+                            Directory.Move(FromDir, ToDir);
+                        }
+                        else
+                        {
+                            File.Move(FromDir, ToDir);
+                        }
+
+                        ReloadRight();
+                        ReloadLeft();
+                    }
                 }
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                MessageBox.Show(ex.Message); //Обработчик в основном на админские права
+                MessageBox.Show(exception.Message);
             }
-            ReloadLeft();
         }
-        private void ToolStripMenuItemLeft_copy_Click(object sender, EventArgs e)
-        {
-            FileName = listView_left.FocusedItem.Text;
-            FromDir = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName);
-        }
-        private void ToolStripMenuItemLeft_delete_Click(object sender, EventArgs e)
-        {
-            FileName = listView_left.FocusedItem.Text;
-            FromDir = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName);
-            if (Path.GetExtension(FromDir) == "")
-            {
-                Directory.Delete(FromDir);
-            }
-            else
-            {
-                File.Delete(FromDir);
-            }
 
-            ReloadLeft();
-        }
-        private void ToolStripMenuItemRight_copy_Click(object sender, EventArgs e)
+        private void button_delete_Click(object sender, EventArgs e)
         {
-            FileName = listView_right.FocusedItem.Text;
-            FromDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
-        }
-        private void ToolStripMenuItemRight_paste_Click(object sender, EventArgs e)
-        {
-            ToDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
-            try
+            if (ActiveListView_Left)
             {
+                FileName = listView_left.FocusedItem.Text;
+                FromDir = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName);
                 if (Path.GetExtension(FromDir) == "")
                 {
-                    CopyDir(FromDir, ToDir);
+                    Directory.Delete(FromDir, true);
                 }
                 else
                 {
-                    File.Copy(FromDir, ToDir, true);
+                    File.Delete(FromDir);
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message); //Обработчик в основном на админские права
-            }
-            Fill_listviewFolders(Settings.Default.RightPath, listView_right);
-            Fill_listviewFiles(Settings.Default.RightPath, listView_right);
-        }
-        private void ToolStripMenuItemRight_delete_Click(object sender, EventArgs e)
-        {
-            FileName = listView_right.FocusedItem.Text;
-            FromDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
-            if (Path.GetExtension(FromDir) == "")
-            {
-                Directory.Delete(FromDir);
+
+                ReloadLeft();
             }
             else
             {
-                File.Delete(FromDir);
-            }
+                if (ActiveListView_Right)
+                {
+                    FileName = listView_right.FocusedItem.Text;
+                    FromDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
+                    if (Path.GetExtension(FromDir) == "")
+                    {
+                        Directory.Delete(FromDir, true);
+                    }
+                    else
+                    {
+                        File.Delete(FromDir);
+                    }
 
-            ReloadRight();
+                    ReloadRight();
+                }
+            }
+        }
+
+        private void button_paste_Click(object sender, EventArgs e)
+        {
+            if (ActiveListView_Left)
+            {
+                ToDir = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName);
+                try
+                {
+                    if (Path.GetExtension(FromDir) == "")
+                    {
+                        CopyDir(FromDir, ToDir);
+                    }
+                    else
+                    {
+                        File.Copy(FromDir, ToDir, true);
+                    }
+
+                    ReloadLeft();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message); //Обработчик в основном на админские права
+                }
+            }
+            else
+            {
+                if (ActiveListView_Right)
+                {
+                    ToDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
+                    try
+                    {
+                        if (Path.GetExtension(FromDir) == "")
+                        {
+                            CopyDir(FromDir, ToDir);
+                        }
+                        else
+                        {
+                            File.Copy(FromDir, ToDir, true);
+                        }
+
+                        ReloadRight();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message); //Обработчик в основном на админские права
+                    }
+
+                    Fill_listviewFolders(Settings.Default.RightPath, listView_right);
+                    Fill_listviewFiles(Settings.Default.RightPath, listView_right);
+                }
+            }
+        }
+
+        private void button_copy_Click(object sender, EventArgs e)
+        {
+            if (ActiveListView_Left)
+            {
+                FileName = listView_left.FocusedItem.Text;
+                FromDir = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName);
+            }
+            else
+            {
+                if (ActiveListView_Right)
+                {
+                    FileName = listView_right.FocusedItem.Text;
+                    FromDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
+                }
+            }
+        }
+
+        private void listView_left_MouseDown(object sender, MouseEventArgs e)
+        {
+            ActiveListView_Left = true;
+            ActiveListView_Right = false;
+        }
+
+        private void listView_right_MouseDown(object sender, MouseEventArgs e)
+        {
+            ActiveListView_Right = true;
+            ActiveListView_Left = false;
         }
     }
 
@@ -322,6 +424,7 @@ namespace File_Explorer_v2
 
                 changedPath = directory.FullName + addSlashes + changed;
             }
+
             return changedPath;
         }
 

@@ -57,8 +57,9 @@
             this.button_copy = new System.Windows.Forms.Button();
             this.button_paste = new System.Windows.Forms.Button();
             this.button_move = new System.Windows.Forms.Button();
-            this.button_cut = new System.Windows.Forms.Button();
             this.button_delete = new System.Windows.Forms.Button();
+            this.toolStripMenuItem_move = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_moveR = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip_ListviewLeft.SuspendLayout();
             this.contextMenuStrip_ListviewRight.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -86,6 +87,7 @@
             this.listView_left.UseCompatibleStateImageBehavior = false;
             this.listView_left.View = System.Windows.Forms.View.Details;
             this.listView_left.ItemActivate += new System.EventHandler(this.listView_left_ItemActivate);
+            this.listView_left.MouseDown += new System.Windows.Forms.MouseEventHandler(this.listView_left_MouseDown);
             // 
             // NameFl
             // 
@@ -114,30 +116,31 @@
             this.contextMenuStrip_ListviewLeft.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItem_copy,
             this.ToolStripMenuItem_paste,
+            this.toolStripMenuItem_move,
             this.удалитьToolStripMenuItem});
             this.contextMenuStrip_ListviewLeft.Name = "contextMenuStrip_Listview";
-            this.contextMenuStrip_ListviewLeft.Size = new System.Drawing.Size(163, 76);
+            this.contextMenuStrip_ListviewLeft.Size = new System.Drawing.Size(170, 100);
             // 
             // toolStripMenuItem_copy
             // 
             this.toolStripMenuItem_copy.Name = "toolStripMenuItem_copy";
-            this.toolStripMenuItem_copy.Size = new System.Drawing.Size(162, 24);
+            this.toolStripMenuItem_copy.Size = new System.Drawing.Size(210, 24);
             this.toolStripMenuItem_copy.Text = "Копировать";
-            this.toolStripMenuItem_copy.Click += new System.EventHandler(this.ToolStripMenuItemLeft_copy_Click);
+            this.toolStripMenuItem_copy.Click += new System.EventHandler(this.button_copy_Click);
             // 
             // ToolStripMenuItem_paste
             // 
             this.ToolStripMenuItem_paste.Name = "ToolStripMenuItem_paste";
-            this.ToolStripMenuItem_paste.Size = new System.Drawing.Size(162, 24);
+            this.ToolStripMenuItem_paste.Size = new System.Drawing.Size(210, 24);
             this.ToolStripMenuItem_paste.Text = "Вставить";
-            this.ToolStripMenuItem_paste.Click += new System.EventHandler(this.ToolStripMenuItemLeft_paste_Click);
+            this.ToolStripMenuItem_paste.Click += new System.EventHandler(this.button_paste_Click);
             // 
             // удалитьToolStripMenuItem
             // 
             this.удалитьToolStripMenuItem.Name = "удалитьToolStripMenuItem";
-            this.удалитьToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
+            this.удалитьToolStripMenuItem.Size = new System.Drawing.Size(210, 24);
             this.удалитьToolStripMenuItem.Text = "Удалить";
-            this.удалитьToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItemLeft_delete_Click);
+            this.удалитьToolStripMenuItem.Click += new System.EventHandler(this.button_delete_Click);
             // 
             // listView_right
             // 
@@ -158,6 +161,7 @@
             this.listView_right.UseCompatibleStateImageBehavior = false;
             this.listView_right.View = System.Windows.Forms.View.Details;
             this.listView_right.ItemActivate += new System.EventHandler(this.listView_right_ItemActivate);
+            this.listView_right.MouseDown += new System.Windows.Forms.MouseEventHandler(this.listView_right_MouseDown);
             // 
             // NameFr
             // 
@@ -186,30 +190,31 @@
             this.contextMenuStrip_ListviewRight.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.копироватьToolStripMenuItem,
             this.вставитьToolStripMenuItem,
+            this.toolStripMenuItem_moveR,
             this.удалитьToolStripMenuItem1});
             this.contextMenuStrip_ListviewRight.Name = "contextMenuStrip_ListviewRight";
-            this.contextMenuStrip_ListviewRight.Size = new System.Drawing.Size(163, 76);
+            this.contextMenuStrip_ListviewRight.Size = new System.Drawing.Size(170, 100);
             // 
             // копироватьToolStripMenuItem
             // 
             this.копироватьToolStripMenuItem.Name = "копироватьToolStripMenuItem";
-            this.копироватьToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
+            this.копироватьToolStripMenuItem.Size = new System.Drawing.Size(169, 24);
             this.копироватьToolStripMenuItem.Text = "Копировать";
-            this.копироватьToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItemRight_copy_Click);
+            this.копироватьToolStripMenuItem.Click += new System.EventHandler(this.button_copy_Click);
             // 
             // вставитьToolStripMenuItem
             // 
             this.вставитьToolStripMenuItem.Name = "вставитьToolStripMenuItem";
-            this.вставитьToolStripMenuItem.Size = new System.Drawing.Size(162, 24);
+            this.вставитьToolStripMenuItem.Size = new System.Drawing.Size(169, 24);
             this.вставитьToolStripMenuItem.Text = "Вставить";
-            this.вставитьToolStripMenuItem.Click += new System.EventHandler(this.ToolStripMenuItemRight_paste_Click);
+            this.вставитьToolStripMenuItem.Click += new System.EventHandler(this.button_paste_Click);
             // 
             // удалитьToolStripMenuItem1
             // 
             this.удалитьToolStripMenuItem1.Name = "удалитьToolStripMenuItem1";
-            this.удалитьToolStripMenuItem1.Size = new System.Drawing.Size(162, 24);
+            this.удалитьToolStripMenuItem1.Size = new System.Drawing.Size(169, 24);
             this.удалитьToolStripMenuItem1.Text = "Удалить";
-            this.удалитьToolStripMenuItem1.Click += new System.EventHandler(this.ToolStripMenuItemRight_delete_Click);
+            this.удалитьToolStripMenuItem1.Click += new System.EventHandler(this.button_delete_Click);
             // 
             // splitContainer1
             // 
@@ -263,48 +268,55 @@
             // 
             this.button_copy.Location = new System.Drawing.Point(15, 514);
             this.button_copy.Name = "button_copy";
-            this.button_copy.Size = new System.Drawing.Size(100, 25);
+            this.button_copy.Size = new System.Drawing.Size(110, 25);
             this.button_copy.TabIndex = 7;
             this.button_copy.Text = "Копировать";
             this.button_copy.UseVisualStyleBackColor = true;
-            this.button_copy.Click += new System.EventHandler(this.ToolStripMenuItemLeft_copy_Click);
+            this.button_copy.Click += new System.EventHandler(this.button_copy_Click);
             // 
             // button_paste
             // 
             this.button_paste.Location = new System.Drawing.Point(130, 514);
             this.button_paste.Name = "button_paste";
-            this.button_paste.Size = new System.Drawing.Size(100, 25);
+            this.button_paste.Size = new System.Drawing.Size(110, 25);
             this.button_paste.TabIndex = 8;
             this.button_paste.Text = "Вставить";
             this.button_paste.UseVisualStyleBackColor = true;
-            this.button_paste.Click += new System.EventHandler(this.ToolStripMenuItemLeft_paste_Click);
+            this.button_paste.Click += new System.EventHandler(this.button_paste_Click);
             // 
             // button_move
             // 
             this.button_move.Location = new System.Drawing.Point(245, 514);
             this.button_move.Name = "button_move";
-            this.button_move.Size = new System.Drawing.Size(100, 25);
+            this.button_move.Size = new System.Drawing.Size(110, 25);
             this.button_move.TabIndex = 9;
             this.button_move.Text = "Переместить";
             this.button_move.UseVisualStyleBackColor = true;
-            // 
-            // button_cut
-            // 
-            this.button_cut.Location = new System.Drawing.Point(360, 514);
-            this.button_cut.Name = "button_cut";
-            this.button_cut.Size = new System.Drawing.Size(100, 25);
-            this.button_cut.TabIndex = 10;
-            this.button_cut.Text = "Вырезать";
-            this.button_cut.UseVisualStyleBackColor = true;
+            this.button_move.Click += new System.EventHandler(this.button_move_Click);
             // 
             // button_delete
             // 
-            this.button_delete.Location = new System.Drawing.Point(475, 514);
+            this.button_delete.Location = new System.Drawing.Point(361, 514);
             this.button_delete.Name = "button_delete";
-            this.button_delete.Size = new System.Drawing.Size(100, 25);
+            this.button_delete.Size = new System.Drawing.Size(110, 25);
             this.button_delete.TabIndex = 11;
             this.button_delete.Text = "Удалить";
             this.button_delete.UseVisualStyleBackColor = true;
+            this.button_delete.Click += new System.EventHandler(this.button_delete_Click);
+            // 
+            // toolStripMenuItem_move
+            // 
+            this.toolStripMenuItem_move.Name = "toolStripMenuItem_move";
+            this.toolStripMenuItem_move.Size = new System.Drawing.Size(169, 24);
+            this.toolStripMenuItem_move.Text = "Переместить";
+            this.toolStripMenuItem_move.Click += new System.EventHandler(this.button_move_Click);
+            // 
+            // toolStripMenuItem_moveR
+            // 
+            this.toolStripMenuItem_moveR.Name = "toolStripMenuItem_moveR";
+            this.toolStripMenuItem_moveR.Size = new System.Drawing.Size(169, 24);
+            this.toolStripMenuItem_moveR.Text = "Переместить";
+            this.toolStripMenuItem_moveR.Click += new System.EventHandler(this.button_move_Click);
             // 
             // TotalCommander
             // 
@@ -312,7 +324,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1182, 549);
             this.Controls.Add(this.button_delete);
-            this.Controls.Add(this.button_cut);
             this.Controls.Add(this.button_move);
             this.Controls.Add(this.button_paste);
             this.Controls.Add(this.button_copy);
@@ -336,9 +347,6 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.ListView listView_left;
-        private System.Windows.Forms.ListView listView_right;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.ColumnHeader NameFl;
         private System.Windows.Forms.ColumnHeader TypeFl;
@@ -350,7 +358,6 @@
         private System.Windows.Forms.ColumnHeader DateFr;
         private System.Windows.Forms.Panel DiskRightPanel;
         private System.Windows.Forms.Panel DiskLeftPanel;
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip_ListviewLeft;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_copy;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_paste;
         private System.Windows.Forms.ColumnHeader PathFl;
@@ -365,8 +372,12 @@
         private System.Windows.Forms.Button button_copy;
         private System.Windows.Forms.Button button_paste;
         private System.Windows.Forms.Button button_move;
-        private System.Windows.Forms.Button button_cut;
         private System.Windows.Forms.Button button_delete;
+        public System.Windows.Forms.ListView listView_left;
+        public System.Windows.Forms.ListView listView_right;
+        public System.Windows.Forms.ContextMenuStrip contextMenuStrip_ListviewLeft;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_move;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_moveR;
     }
 }
 
