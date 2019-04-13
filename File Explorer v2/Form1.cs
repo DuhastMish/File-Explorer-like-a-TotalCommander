@@ -7,16 +7,21 @@ using File_Explorer_v2.Properties;
 
 namespace File_Explorer_v2
 {
-    public partial class Form1 : Form
+    public partial class TotalCommander : Form
     {
-        public Form1()
+        public TotalCommander()
         {
             InitializeComponent();
         }
 
+        public string FileName; //Имя файла
+        public string ToDir; //Путь вставки файла
+        public string FromDir; //Путь копирования файла
+
         private void Form1_Load(object sender, EventArgs e)
         {
-            Reload();
+            ReloadLeft();
+            ReloadRight();
             ButtonDisks(DiskRightPanel);
             ButtonDisks(DiskLeftPanel);
         }
@@ -85,10 +90,14 @@ namespace File_Explorer_v2
             }
         }
 
-        private void Reload()
+        private void ReloadLeft()
         {
             Fill_listviewFolders(Settings.Default.LeftPath, listView_left);
             Fill_listviewFiles(Settings.Default.LeftPath, listView_left);
+        }
+
+        private void ReloadRight()
+        {
             Fill_listviewFolders(Settings.Default.RightPath, listView_right);
             Fill_listviewFiles(Settings.Default.RightPath, listView_right);
         }
@@ -103,13 +112,13 @@ namespace File_Explorer_v2
                     Settings.Default.LeftPath = ((Button) sender).Name;
                     label1.Text = Settings.Default.LeftPath;
                 }
-
                 {
                     if (nP == "DiskRightPanel")
                         Settings.Default.RightPath = ((Button) sender).Name;
                     label2.Text = Settings.Default.RightPath;
                 }
-                Reload();
+                ReloadLeft();
+                ReloadRight();
             }
             catch
             {
@@ -142,16 +151,19 @@ namespace File_Explorer_v2
             }
         }
 
-        private void ToolStripMenuItem_paste_Click(object sender, EventArgs e)
+        void CopyDir(string FromDir, string ToDir)
         {
-            MessageBox.Show("Запоминаем путь откуда копировать");
+            Directory.CreateDirectory(ToDir);
+            foreach (string s1 in Directory.GetFiles(FromDir))
+            {
+                string s2 = ToDir + "\\" + Path.GetFileName(s1);
+                File.Copy(s1, s2);
+            }
+            foreach (string s in Directory.GetDirectories(FromDir))
+            {
+                CopyDir(s, ToDir + "\\" + Path.GetFileName(s));
+            }
         }
-
-        private void toolStripMenuItem_copy_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("Копируем по выбранному в списке пути файл");
-        }
-
         private void listView_left_ItemActivate(object sender, EventArgs e)
         {
             label1.Text = Settings.Default.LeftPath;
@@ -180,7 +192,6 @@ namespace File_Explorer_v2
                 MessageBox.Show("Данный файл не может быть открыт");
             }
         }
-
         private void listView_right_ItemActivate(object sender, EventArgs e)
         {
             var rigthNotChangedPath = Settings.Default.RightPath;
@@ -208,6 +219,88 @@ namespace File_Explorer_v2
 
             label2.Text = Settings.Default.RightPath;
         }
+        private void ToolStripMenuItemLeft_paste_Click(object sender, EventArgs e)
+        {
+            ToDir = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName);
+            try
+            {
+                if (Path.GetExtension(FromDir) == "")
+                {
+                    CopyDir(FromDir, ToDir);
+                    //MessageBox.Show("выбрана папка");
+                }
+                else
+                {
+                    File.Copy(FromDir, ToDir, true);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message); //Обработчик в основном на админские права
+            }
+            ReloadLeft();
+        }
+        private void ToolStripMenuItemLeft_copy_Click(object sender, EventArgs e)
+        {
+            FileName = listView_left.FocusedItem.Text;
+            FromDir = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName);
+        }
+        private void ToolStripMenuItemLeft_delete_Click(object sender, EventArgs e)
+        {
+            FileName = listView_left.FocusedItem.Text;
+            FromDir = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName);
+            if (Path.GetExtension(FromDir) == "")
+            {
+                Directory.Delete(FromDir);
+            }
+            else
+            {
+                File.Delete(FromDir);
+            }
+
+            ReloadLeft();
+        }
+        private void ToolStripMenuItemRight_copy_Click(object sender, EventArgs e)
+        {
+            FileName = listView_right.FocusedItem.Text;
+            FromDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
+        }
+        private void ToolStripMenuItemRight_paste_Click(object sender, EventArgs e)
+        {
+            ToDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
+            try
+            {
+                if (Path.GetExtension(FromDir) == "")
+                {
+                    CopyDir(FromDir, ToDir);
+                }
+                else
+                {
+                    File.Copy(FromDir, ToDir, true);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message); //Обработчик в основном на админские права
+            }
+            Fill_listviewFolders(Settings.Default.RightPath, listView_right);
+            Fill_listviewFiles(Settings.Default.RightPath, listView_right);
+        }
+        private void ToolStripMenuItemRight_delete_Click(object sender, EventArgs e)
+        {
+            FileName = listView_right.FocusedItem.Text;
+            FromDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
+            if (Path.GetExtension(FromDir) == "")
+            {
+                Directory.Delete(FromDir);
+            }
+            else
+            {
+                File.Delete(FromDir);
+            }
+
+            ReloadRight();
+        }
     }
 
     internal class Build
@@ -229,7 +322,6 @@ namespace File_Explorer_v2
 
                 changedPath = directory.FullName + addSlashes + changed;
             }
-
             return changedPath;
         }
 
