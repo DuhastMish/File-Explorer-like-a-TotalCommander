@@ -90,6 +90,7 @@
             this.listView_left.UseCompatibleStateImageBehavior = false;
             this.listView_left.View = System.Windows.Forms.View.Details;
             this.listView_left.ItemActivate += new System.EventHandler(this.listView_left_ItemActivate);
+            this.listView_left.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TotalCommander_KeyDown);
             this.listView_left.MouseDown += new System.Windows.Forms.MouseEventHandler(this.listView_left_MouseDown);
             // 
             // NameFl
@@ -179,6 +180,7 @@
             this.listView_right.UseCompatibleStateImageBehavior = false;
             this.listView_right.View = System.Windows.Forms.View.Details;
             this.listView_right.ItemActivate += new System.EventHandler(this.listView_right_ItemActivate);
+            this.listView_right.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TotalCommander_KeyDown);
             this.listView_right.MouseDown += new System.Windows.Forms.MouseEventHandler(this.listView_right_MouseDown);
             // 
             // NameFr
@@ -251,6 +253,9 @@
             // 
             // splitContainer1
             // 
+            this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainer1.Location = new System.Drawing.Point(12, 82);
             this.splitContainer1.Name = "splitContainer1";
             // 
@@ -281,41 +286,45 @@
             // 
             // button_copy
             // 
+            this.button_copy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.button_copy.Location = new System.Drawing.Point(15, 514);
             this.button_copy.Name = "button_copy";
-            this.button_copy.Size = new System.Drawing.Size(110, 25);
+            this.button_copy.Size = new System.Drawing.Size(150, 25);
             this.button_copy.TabIndex = 7;
-            this.button_copy.Text = "Копировать";
+            this.button_copy.Text = "Копировать (F5)";
             this.button_copy.UseVisualStyleBackColor = true;
             this.button_copy.Click += new System.EventHandler(this.button_copy_Click);
             // 
             // button_paste
             // 
-            this.button_paste.Location = new System.Drawing.Point(130, 514);
+            this.button_paste.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button_paste.Location = new System.Drawing.Point(175, 514);
             this.button_paste.Name = "button_paste";
-            this.button_paste.Size = new System.Drawing.Size(110, 25);
+            this.button_paste.Size = new System.Drawing.Size(150, 25);
             this.button_paste.TabIndex = 8;
-            this.button_paste.Text = "Вставить";
+            this.button_paste.Text = "Вставить (F6)";
             this.button_paste.UseVisualStyleBackColor = true;
             this.button_paste.Click += new System.EventHandler(this.button_paste_Click);
             // 
             // button_move
             // 
-            this.button_move.Location = new System.Drawing.Point(245, 514);
+            this.button_move.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button_move.Location = new System.Drawing.Point(335, 514);
             this.button_move.Name = "button_move";
-            this.button_move.Size = new System.Drawing.Size(110, 25);
+            this.button_move.Size = new System.Drawing.Size(150, 25);
             this.button_move.TabIndex = 9;
-            this.button_move.Text = "Переместить";
+            this.button_move.Text = "Переместить (F7)";
             this.button_move.UseVisualStyleBackColor = true;
             this.button_move.Click += new System.EventHandler(this.button_move_Click);
             // 
             // button_delete
             // 
-            this.button_delete.Location = new System.Drawing.Point(360, 514);
+            this.button_delete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button_delete.Location = new System.Drawing.Point(495, 514);
             this.button_delete.Name = "button_delete";
-            this.button_delete.Size = new System.Drawing.Size(110, 25);
+            this.button_delete.Size = new System.Drawing.Size(150, 25);
             this.button_delete.TabIndex = 11;
-            this.button_delete.Text = "Удалить";
+            this.button_delete.Text = "Удалить (F8)";
             this.button_delete.UseVisualStyleBackColor = true;
             this.button_delete.Click += new System.EventHandler(this.button_delete_Click);
             // 
@@ -339,11 +348,12 @@
             // 
             // button_create
             // 
-            this.button_create.Location = new System.Drawing.Point(475, 514);
+            this.button_create.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button_create.Location = new System.Drawing.Point(655, 514);
             this.button_create.Name = "button_create";
-            this.button_create.Size = new System.Drawing.Size(110, 25);
+            this.button_create.Size = new System.Drawing.Size(150, 25);
             this.button_create.TabIndex = 14;
-            this.button_create.Text = "Создать папку";
+            this.button_create.Text = "Создать папку (F9)";
             this.button_create.UseVisualStyleBackColor = true;
             this.button_create.Click += new System.EventHandler(this.button_create_Click);
             // 
@@ -351,7 +361,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1182, 549);
+            this.ClientSize = new System.Drawing.Size(1163, 549);
             this.Controls.Add(this.button_create);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.textBox1);
@@ -365,7 +375,6 @@
             this.Name = "TotalCommander";
             this.Text = "Total Commander";
             this.Load += new System.EventHandler(this.Form1_Load);
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TotalCommander_KeyDown);
             this.contextMenuStrip_ListviewLeft.ResumeLayout(false);
             this.contextMenuStrip_ListviewRight.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);

@@ -4,7 +4,6 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using File_Explorer_v2.Properties;
-using static File_Explorer_v2.CreateFolder;
 
 namespace File_Explorer_v2
 {
@@ -18,12 +17,12 @@ namespace File_Explorer_v2
         public string FileName; //Имя файла
         public string ToDir; //Путь вставки файла
         public string FromDir; //Путь копирования файла
-        public string BeforeChangedDiskRight;
-        public string BeforeChangedDiskLeft;
-        bool ActiveListView_Left = true;
+        public string BeforeChangedDiskRight; //Старый путь перед нажатием на кнопку диска
+        public string BeforeChangedDiskLeft; //Старый путь перед нажатием на кнопку диска
+        bool ActiveListView_Left = true; //Какой листвью активный
         bool ActiveListView_Right;
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void Form1_Load(object sender, EventArgs e) //Загрузка данных при первом запуске
         {
             ReloadLeft();
             ReloadRight();
@@ -31,7 +30,7 @@ namespace File_Explorer_v2
             ButtonDisks(DiskLeftPanel);
         }
 
-        private static void Fill_listviewFolders(string path, ListView list)
+        private static void Fill_listviewFolders(string path, ListView list) //Заполнение папок
         {
             list.Clear();
             var lv = Build.BuildColumnHeaders(list);
@@ -70,7 +69,7 @@ namespace File_Explorer_v2
             }
         }
 
-        private static void Fill_listviewFiles(string path, ListView list)
+        private static void Fill_listviewFiles(string path, ListView list) //Заполнение файлов. Можно обьеденить с папками
         {
             var directory = new DirectoryInfo(path);
 
@@ -81,7 +80,7 @@ namespace File_Explorer_v2
                     if ((dirFile.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden)
                         continue;
 
-                var ListFile = new ListViewItem(new[]
+                var listFile = new ListViewItem(new[]
                 {
                     Path.GetFileNameWithoutExtension( /*path +*/ dirFile.Name + dirFile.Extension),
                     dirFile.Extension,
@@ -90,23 +89,23 @@ namespace File_Explorer_v2
                     dirFile.LastAccessTime.ToShortTimeString(),
                     dirFile.FullName
                 });
-                list.Items.Add(ListFile);
+                list.Items.Add(listFile);
             }
         }
 
-        private void ReloadLeft()
+        private void ReloadLeft() //Новое заполнение левого
         {
             Fill_listviewFolders(Settings.Default.LeftPath, listView_left);
             Fill_listviewFiles(Settings.Default.LeftPath, listView_left);
         }
 
-        private void ReloadRight()
+        private void ReloadRight() //Новое заполнение правого
         {
             Fill_listviewFolders(Settings.Default.RightPath, listView_right);
             Fill_listviewFiles(Settings.Default.RightPath, listView_right);
         }
 
-        private void DriveChange(object sender, EventArgs e)
+        private void DriveChange(object sender, EventArgs e) //Выполнение нажатий на кнопоки дисков
         {
             var nP = ((Button) sender).Tag.ToString();
             try
@@ -146,7 +145,7 @@ namespace File_Explorer_v2
             }
         }
 
-        private void ButtonDisks(Panel pnl)
+        private void ButtonDisks(Panel pnl) //Генерация кнопок согласно дискам
         {
             var sDi = DriveInfo.GetDrives();
 
@@ -170,7 +169,7 @@ namespace File_Explorer_v2
             }
         }
 
-        void CopyDir(string FromDir, string ToDir)
+        void CopyDir(string FromDir, string ToDir) //Копирование всех подкатологов и файлов выбранной папки
         {
             Directory.CreateDirectory(ToDir);
             foreach (string s1 in Directory.GetFiles(FromDir))
@@ -185,7 +184,7 @@ namespace File_Explorer_v2
             }
         }
 
-        private void listView_left_ItemActivate(object sender, EventArgs e)
+        private void listView_left_ItemActivate(object sender, EventArgs e) //Переход/Открытие папок и файлов
         {
             var leftNotChangedPath = Settings.Default.LeftPath;
             var changed = listView_left.FocusedItem.Text;
@@ -209,10 +208,11 @@ namespace File_Explorer_v2
             {
                 MessageBox.Show("Данный файл не может быть открыт");
             }
+
             textBox1.Text = Settings.Default.LeftPath;
         }
 
-        private void listView_right_ItemActivate(object sender, EventArgs e)
+        private void listView_right_ItemActivate(object sender, EventArgs e) //Переход/Открытие папок и файлов
         {
             var rigthNotChangedPath = Settings.Default.RightPath;
             var changed = listView_right.FocusedItem.Text;
@@ -240,7 +240,7 @@ namespace File_Explorer_v2
             textBox2.Text = Settings.Default.RightPath;
         }
 
-        private void button_move_Click(object sender, EventArgs e)
+        private void button_move_Click(object sender, EventArgs e) //Копка переместить
         {
             try
             {
@@ -261,21 +261,19 @@ namespace File_Explorer_v2
                 }
                 else
                 {
-                    if (ActiveListView_Right)
+                    if (!ActiveListView_Right) return;
+                    ToDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
+                    if (Path.GetExtension(FromDir) == "")
                     {
-                        ToDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
-                        if (Path.GetExtension(FromDir) == "")
-                        {
-                            Directory.Move(FromDir, ToDir);
-                        }
-                        else
-                        {
-                            File.Move(FromDir, ToDir);
-                        }
-
-                        ReloadRight();
-                        ReloadLeft();
+                        Directory.Move(FromDir, ToDir);
                     }
+                    else
+                    {
+                        File.Move(FromDir, ToDir);
+                    }
+
+                    ReloadRight();
+                    ReloadLeft();
                 }
             }
             catch (Exception exception)
@@ -284,7 +282,7 @@ namespace File_Explorer_v2
             }
         }
 
-        private void button_delete_Click(object sender, EventArgs e)
+        private void button_delete_Click(object sender, EventArgs e) //Кнопка удалить
         {
             if (ActiveListView_Left)
             {
@@ -303,25 +301,23 @@ namespace File_Explorer_v2
             }
             else
             {
-                if (ActiveListView_Right)
+                if (!ActiveListView_Right) return;
+                FileName = listView_right.FocusedItem.Text;
+                FromDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
+                if (Path.GetExtension(FromDir) == "")
                 {
-                    FileName = listView_right.FocusedItem.Text;
-                    FromDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
-                    if (Path.GetExtension(FromDir) == "")
-                    {
-                        Directory.Delete(FromDir, true);
-                    }
-                    else
-                    {
-                        File.Delete(FromDir);
-                    }
-
-                    ReloadRight();
+                    Directory.Delete(FromDir, true);
                 }
+                else
+                {
+                    File.Delete(FromDir);
+                }
+
+                ReloadRight();
             }
         }
 
-        private void button_paste_Click(object sender, EventArgs e)
+        private void button_paste_Click(object sender, EventArgs e) //Кнопка вставить
         {
             if (ActiveListView_Left)
             {
@@ -346,34 +342,32 @@ namespace File_Explorer_v2
             }
             else
             {
-                if (ActiveListView_Right)
+                if (!ActiveListView_Right) return;
+                ToDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
+                try
                 {
-                    ToDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
-                    try
+                    if (Path.GetExtension(FromDir) == "")
                     {
-                        if (Path.GetExtension(FromDir) == "")
-                        {
-                            CopyDir(FromDir, ToDir);
-                        }
-                        else
-                        {
-                            File.Copy(FromDir, ToDir, true);
-                        }
-
-                        ReloadRight();
+                        CopyDir(FromDir, ToDir);
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        MessageBox.Show(ex.Message); //Обработчик в основном на админские права
+                        File.Copy(FromDir, ToDir, true);
                     }
 
-                    Fill_listviewFolders(Settings.Default.RightPath, listView_right);
-                    Fill_listviewFiles(Settings.Default.RightPath, listView_right);
+                    ReloadRight();
                 }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message); //Обработчик в основном на админские права
+                }
+
+                Fill_listviewFolders(Settings.Default.RightPath, listView_right);
+                Fill_listviewFiles(Settings.Default.RightPath, listView_right);
             }
         }
 
-        private void button_copy_Click(object sender, EventArgs e)
+        private void button_copy_Click(object sender, EventArgs e) //Кнопка копировать
         {
             if (ActiveListView_Left)
             {
@@ -382,76 +376,100 @@ namespace File_Explorer_v2
             }
             else
             {
-                if (ActiveListView_Right)
-                {
-                    FileName = listView_right.FocusedItem.Text;
-                    FromDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
-                }
+                if (!ActiveListView_Right) return;
+                FileName = listView_right.FocusedItem.Text;
+                FromDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
             }
         }
 
-        private void listView_left_MouseDown(object sender, MouseEventArgs e)
+        private void listView_left_MouseDown(object sender, MouseEventArgs e) //Обработчик нажатия для активации листвью
         {
             ActiveListView_Left = true;
             ActiveListView_Right = false;
         }
 
-        private void listView_right_MouseDown(object sender, MouseEventArgs e)
+        private void listView_right_MouseDown(object sender, MouseEventArgs e) //Обработчик нажатия для активации листвью
         {
             ActiveListView_Right = true;
             ActiveListView_Left = false;
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
+        private void textBox1_TextChanged(object sender, EventArgs e) //Прописывание пути
         {
             try
             {
                 Settings.Default.LeftPath = textBox1.Text;
                 ReloadLeft();
             }
-            catch { }
+            catch
+            {
+            }
         }
 
-        private void textBox2_TextChanged(object sender, EventArgs e)
+        private void textBox2_TextChanged(object sender, EventArgs e) //Прописывание пути
         {
             try
             {
                 Settings.Default.RightPath = textBox2.Text;
                 ReloadRight();
             }
-            catch { }
+            catch
+            {
+            }
         }
 
-        private void button_create_Click(object sender, EventArgs e)
+        private void button_create_Click(object sender, EventArgs e) //Создание папки через новую форму
         {
-            CreateFolder newFolder = new CreateFolder();
+            var newFolder = new CreateFolder();
             newFolder.Show();
-            newFolder.FormClosing += (senderr, eventArgs) =>
+            newFolder.FormClosing += (senderr, eventArgs) => //Выполнение действия после закрытия формы
             {
                 if (ActiveListView_Left)
                 {
                     Directory.CreateDirectory(
-                        Build.PrepareLocalPath(Settings.Default.LeftPath, CreateFolder.nameFolder));
+                        Build.PrepareLocalPath(Settings.Default.LeftPath, CreateFolder.NameFolder));
                     ReloadLeft();
                 }
                 else
                 {
-                    if (ActiveListView_Right)
-                    {
-                        Directory.CreateDirectory(Build.PrepareLocalPath(Settings.Default.RightPath,
-                            CreateFolder.nameFolder));
-                        ReloadRight();
-                    }
+                    if (!ActiveListView_Right) return;
+                    Directory.CreateDirectory(Build.PrepareLocalPath(Settings.Default.RightPath,
+                        CreateFolder.NameFolder));
+                    ReloadRight();
                 }
             };
         }
 
         private void TotalCommander_KeyDown(object sender, KeyEventArgs e)
         {
-            //if (e.KeyData != Keys.F5)
-            //{
-            //    button_copy(sender,e);
-            //}
+            switch (e.KeyCode)
+            {
+                case Keys.F5:
+                {
+                    button_copy_Click(sender, e);
+                    break;
+                }
+                case Keys.F6:
+                {
+                    button_paste_Click(sender, e);
+                    break;
+                }
+                case Keys.F7:
+                {
+                    button_move_Click(sender, e);
+                    break;
+                }
+                case Keys.F8:
+                {
+                    button_delete_Click(sender, e);
+                    break;
+                }
+                case Keys.F9:
+                {
+                    button_create_Click(sender, e);
+                    break;
+                }
+            }
         }
     }
 

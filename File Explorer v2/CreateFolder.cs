@@ -17,18 +17,18 @@ namespace File_Explorer_v2
             InitializeComponent();
         }
 
-        public static string nameFolder = null;
+        public static string NameFolder = null;
 
         private void button_accept_Click(object sender, EventArgs e)
         {
-            if (String.IsNullOrEmpty(Name_Folder.Text))
+            if (string.IsNullOrEmpty(Name_Folder.Text))
             {
                 MessageBox.Show("Введите имя!");
 
             }
             else
             {
-                nameFolder = Name_Folder.Text;
+                NameFolder = Name_Folder.Text;
                 Close();
                 Dispose();
             }
