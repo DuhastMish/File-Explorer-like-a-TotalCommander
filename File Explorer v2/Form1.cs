@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using File_Explorer_v2.Properties;
+using static File_Explorer_v2.CreateFolder;
 
 namespace File_Explorer_v2
 {
@@ -19,7 +20,7 @@ namespace File_Explorer_v2
         public string FromDir; //Путь копирования файла
         public string BeforeChangedDiskRight;
         public string BeforeChangedDiskLeft;
-        bool ActiveListView_Left;
+        bool ActiveListView_Left = true;
         bool ActiveListView_Right;
 
         private void Form1_Load(object sender, EventArgs e)
@@ -114,7 +115,7 @@ namespace File_Explorer_v2
                 {
                     BeforeChangedDiskLeft = Settings.Default.LeftPath;
                     Settings.Default.LeftPath = ((Button) sender).Name;
-                    label1.Text = Settings.Default.LeftPath;
+                    textBox1.Text = Settings.Default.LeftPath;
                     ReloadLeft();
                 }
             }
@@ -132,7 +133,7 @@ namespace File_Explorer_v2
                 {
                     BeforeChangedDiskRight = Settings.Default.RightPath;
                     Settings.Default.RightPath = ((Button) sender).Name;
-                    label2.Text = Settings.Default.RightPath;
+                    textBox2.Text = Settings.Default.RightPath;
                     ReloadRight();
                 }
             }
@@ -203,15 +204,12 @@ namespace File_Explorer_v2
                     Process.Start(leftChangedPath);
                     Settings.Default.LeftPath = leftNotChangedPath;
                 }
-
-                label1.Text = Settings.Default.LeftPath;
             }
             catch
             {
                 MessageBox.Show("Данный файл не может быть открыт");
             }
-
-            label1.Text = Settings.Default.LeftPath;
+            textBox1.Text = Settings.Default.LeftPath;
         }
 
         private void listView_right_ItemActivate(object sender, EventArgs e)
@@ -239,7 +237,7 @@ namespace File_Explorer_v2
                 MessageBox.Show("Данный файл не может быть открыт");
             }
 
-            label2.Text = Settings.Default.RightPath;
+            textBox2.Text = Settings.Default.RightPath;
         }
 
         private void button_move_Click(object sender, EventArgs e)
@@ -402,6 +400,58 @@ namespace File_Explorer_v2
         {
             ActiveListView_Right = true;
             ActiveListView_Left = false;
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                Settings.Default.LeftPath = textBox1.Text;
+                ReloadLeft();
+            }
+            catch { }
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                Settings.Default.RightPath = textBox2.Text;
+                ReloadRight();
+            }
+            catch { }
+        }
+
+        private void button_create_Click(object sender, EventArgs e)
+        {
+            CreateFolder newFolder = new CreateFolder();
+            newFolder.Show();
+            newFolder.FormClosing += (senderr, eventArgs) =>
+            {
+                if (ActiveListView_Left)
+                {
+                    Directory.CreateDirectory(
+                        Build.PrepareLocalPath(Settings.Default.LeftPath, CreateFolder.nameFolder));
+                    ReloadLeft();
+                }
+                else
+                {
+                    if (ActiveListView_Right)
+                    {
+                        Directory.CreateDirectory(Build.PrepareLocalPath(Settings.Default.RightPath,
+                            CreateFolder.nameFolder));
+                        ReloadRight();
+                    }
+                }
+            };
+        }
+
+        private void TotalCommander_KeyDown(object sender, KeyEventArgs e)
+        {
+            //if (e.KeyData != Keys.F5)
+            //{
+            //    button_copy(sender,e);
+            //}
         }
     }
 
