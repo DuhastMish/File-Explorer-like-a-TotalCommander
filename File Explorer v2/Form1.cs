@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -9,9 +10,12 @@ namespace File_Explorer_v2
 {
     public partial class TotalCommander : Form
     {
+        IniFile iniFile;
+
         public TotalCommander()
         {
             InitializeComponent();
+            iniFile = IniFile.LoadIniFile();
         }
 
         public string FileName; //Имя файла
@@ -19,15 +23,25 @@ namespace File_Explorer_v2
         public string FromDir; //Путь копирования файла
         public string BeforeChangedDiskRight; //Старый путь перед нажатием на кнопку диска
         public string BeforeChangedDiskLeft; //Старый путь перед нажатием на кнопку диска
-        bool ActiveListView_Left = true; //Какой листвью активный
-        bool ActiveListView_Right;
+        public bool ActiveListViewLeft = true; //Какой листвью активный
+        public bool ActiveListViewRight;
 
         private void Form1_Load(object sender, EventArgs e) //Загрузка данных при первом запуске
         {
+            Settings.Default.LeftPath = iniFile.LeftPathIni;
+            if (!Directory.Exists(Settings.Default.LeftPath))
+                Settings.Default.LeftPath = "C:\\";
+            Settings.Default.RightPath = iniFile.RightPathIni;
+            if (!Directory.Exists(Settings.Default.RightPath))
+                Settings.Default.RightPath = "C:\\";
             ReloadLeft();
             ReloadRight();
             ButtonDisks(DiskRightPanel);
             ButtonDisks(DiskLeftPanel);
+            textBox1.Text = Settings.Default.LeftPath;
+            textBox2.Text = Settings.Default.RightPath;
+            Location = Settings.Default.WinLocation;
+            Size = Settings.Default.WinSize;
         }
 
         private static void Fill_listviewFolders(string path, ListView list) //Заполнение папок
@@ -69,7 +83,8 @@ namespace File_Explorer_v2
             }
         }
 
-        private static void Fill_listviewFiles(string path, ListView list) //Заполнение файлов. Можно обьеденить с папками
+        private static void
+            Fill_listviewFiles(string path, ListView list) //Заполнение файлов. Можно обьеденить с папками
         {
             var directory = new DirectoryInfo(path);
 
@@ -123,6 +138,7 @@ namespace File_Explorer_v2
                 MessageBox.Show("Вставьте диск!",
                     "Внимание!");
                 Settings.Default.LeftPath = BeforeChangedDiskLeft;
+                textBox1.Text = BeforeChangedDiskLeft;
                 ReloadLeft();
             }
 
@@ -141,6 +157,7 @@ namespace File_Explorer_v2
                 MessageBox.Show("Вставьте диск!",
                     "Внимание!");
                 Settings.Default.RightPath = BeforeChangedDiskRight;
+                textBox2.Text = BeforeChangedDiskRight;
                 ReloadRight();
             }
         }
@@ -244,7 +261,7 @@ namespace File_Explorer_v2
         {
             try
             {
-                if (ActiveListView_Left)
+                if (ActiveListViewLeft)
                 {
                     ToDir = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName);
                     if (Path.GetExtension(FromDir) == "")
@@ -261,7 +278,7 @@ namespace File_Explorer_v2
                 }
                 else
                 {
-                    if (!ActiveListView_Right) return;
+                    if (!ActiveListViewRight) return;
                     ToDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
                     if (Path.GetExtension(FromDir) == "")
                     {
@@ -284,7 +301,7 @@ namespace File_Explorer_v2
 
         private void button_delete_Click(object sender, EventArgs e) //Кнопка удалить
         {
-            if (ActiveListView_Left)
+            if (ActiveListViewLeft)
             {
                 FileName = listView_left.FocusedItem.Text;
                 FromDir = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName);
@@ -301,7 +318,7 @@ namespace File_Explorer_v2
             }
             else
             {
-                if (!ActiveListView_Right) return;
+                if (!ActiveListViewRight) return;
                 FileName = listView_right.FocusedItem.Text;
                 FromDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
                 if (Path.GetExtension(FromDir) == "")
@@ -319,7 +336,7 @@ namespace File_Explorer_v2
 
         private void button_paste_Click(object sender, EventArgs e) //Кнопка вставить
         {
-            if (ActiveListView_Left)
+            if (ActiveListViewLeft)
             {
                 ToDir = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName);
                 try
@@ -342,7 +359,7 @@ namespace File_Explorer_v2
             }
             else
             {
-                if (!ActiveListView_Right) return;
+                if (!ActiveListViewRight) return;
                 ToDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
                 try
                 {
@@ -369,14 +386,14 @@ namespace File_Explorer_v2
 
         private void button_copy_Click(object sender, EventArgs e) //Кнопка копировать
         {
-            if (ActiveListView_Left)
+            if (ActiveListViewLeft)
             {
                 FileName = listView_left.FocusedItem.Text;
                 FromDir = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName);
             }
             else
             {
-                if (!ActiveListView_Right) return;
+                if (!ActiveListViewRight) return;
                 FileName = listView_right.FocusedItem.Text;
                 FromDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
             }
@@ -384,19 +401,20 @@ namespace File_Explorer_v2
 
         private void listView_left_MouseDown(object sender, MouseEventArgs e) //Обработчик нажатия для активации листвью
         {
-            ActiveListView_Left = true;
-            ActiveListView_Right = false;
+            ActiveListViewLeft = true;
+            ActiveListViewRight = false;
         }
 
-        private void listView_right_MouseDown(object sender, MouseEventArgs e) //Обработчик нажатия для активации листвью
+        private void
+            listView_right_MouseDown(object sender, MouseEventArgs e) //Обработчик нажатия для активации листвью
         {
-            ActiveListView_Right = true;
-            ActiveListView_Left = false;
+            ActiveListViewRight = true;
+            ActiveListViewLeft = false;
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e) //Прописывание пути
         {
-            try
+            try //Чтобы не выбивало при изменении пути
             {
                 Settings.Default.LeftPath = textBox1.Text;
                 ReloadLeft();
@@ -408,7 +426,7 @@ namespace File_Explorer_v2
 
         private void textBox2_TextChanged(object sender, EventArgs e) //Прописывание пути
         {
-            try
+            try //Чтобы не выбивало при изменении пути
             {
                 Settings.Default.RightPath = textBox2.Text;
                 ReloadRight();
@@ -424,7 +442,7 @@ namespace File_Explorer_v2
             newFolder.Show();
             newFolder.FormClosing += (senderr, eventArgs) => //Выполнение действия после закрытия формы
             {
-                if (ActiveListView_Left)
+                if (ActiveListViewLeft)
                 {
                     Directory.CreateDirectory(
                         Build.PrepareLocalPath(Settings.Default.LeftPath, CreateFolder.NameFolder));
@@ -432,7 +450,7 @@ namespace File_Explorer_v2
                 }
                 else
                 {
-                    if (!ActiveListView_Right) return;
+                    if (!ActiveListViewRight) return;
                     Directory.CreateDirectory(Build.PrepareLocalPath(Settings.Default.RightPath,
                         CreateFolder.NameFolder));
                     ReloadRight();
@@ -469,6 +487,141 @@ namespace File_Explorer_v2
                     button_create_Click(sender, e);
                     break;
                 }
+            }
+        }
+
+        private void TotalCommander_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            iniFile.LeftPathIni = Settings.Default.LeftPath;
+            iniFile.RightPathIni = Settings.Default.RightPath;
+            iniFile.SaveIniFile();
+
+            Settings.Default.WinLocation = Location;
+            if (WindowState == FormWindowState.Normal)
+            {
+                Settings.Default.WinSize = Size;
+            }
+            else
+            {
+                Settings.Default.WinSize = RestoreBounds.Size;
+            }
+
+            Settings.Default.Save();
+        }
+
+        private void listView_left_DragDrop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(typeof(List<ListViewItem>)))
+            {
+                var items = (List<ListViewItem>) e.Data.GetData(typeof(List<ListViewItem>));
+                foreach (ListViewItem lvi in items)
+                {
+                    var FileName = lvi.Text;
+                    var PathTo = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName);
+                    var PathFrom = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
+                    if (Path.GetExtension(PathTo) == "")
+                    {
+                        try
+                        {
+                            CopyDir(PathFrom, PathTo);
+                            Directory.Delete(PathFrom, true);
+                        }
+                        catch
+                        {
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            File.Copy(PathFrom, PathTo, true);
+                            File.Delete(PathFrom);
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+                    ReloadLeft();
+                    ReloadRight();
+                }
+            }
+        }
+
+        private void listView_left_ItemDrag(object sender, ItemDragEventArgs e)
+        {
+            var items = new List<ListViewItem>(); //Массив для всех выбранных элементов
+            items.Add((ListViewItem) e.Item); //Копируем первый
+            foreach (ListViewItem lvi in listView_left.SelectedItems) //Копируем остальные
+            {
+                {
+                    items.Add(lvi);
+                }
+            }
+
+            listView_left.DoDragDrop(items, DragDropEffects.Move);
+        }
+
+        private void listView_right_ItemDrag(object sender, ItemDragEventArgs e)
+        {
+            var items = new List<ListViewItem>(); //Массив для всех выбранных элементов
+            items.Add((ListViewItem) e.Item); //Копируем первый
+            foreach (ListViewItem lvi in listView_right.SelectedItems) //Копируем остальные
+            {
+                {
+                    items.Add(lvi);
+                }
+            }
+
+            listView_right.DoDragDrop(items, DragDropEffects.Move);
+        }
+
+        private void listView_right_DragDrop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(typeof(List<ListViewItem>)))
+            {
+                var items = (List<ListViewItem>) e.Data.GetData(typeof(List<ListViewItem>));
+                foreach (var lvi in items)
+                {
+                    var FileName = lvi.Text;
+                    var PathTo = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
+                    var PathFrom = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName);
+                    if (Path.GetExtension(PathTo) == ""
+                    ) //если файл не имеет расширение то это папка(не имеет занчения какую строку брать , так)
+                    {
+                        try
+                        {
+                            CopyDir(PathFrom, PathTo);
+                            Directory.Delete(PathFrom, true);
+                        }
+                        catch
+                        {
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            File.Copy(PathFrom, PathTo, true);
+
+                            File.Delete(PathFrom);
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+                    ReloadLeft();
+                    ReloadRight();
+                }
+            }
+        }
+
+        private void listView_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(typeof(List<ListViewItem>)))
+            {
+                e.Effect = DragDropEffects.Move;
             }
         }
     }
