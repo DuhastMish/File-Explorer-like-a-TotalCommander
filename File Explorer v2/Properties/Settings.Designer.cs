@@ -82,5 +82,17 @@ namespace File_Explorer_v2.Properties {
                 this["WinLocation"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int SplitDistatnce {
+            get {
+                return ((int)(this["SplitDistatnce"]));
+            }
+            set {
+                this["SplitDistatnce"] = value;
+            }
+        }
     }
 }

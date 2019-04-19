@@ -40,6 +40,7 @@ namespace File_Explorer_v2
             ButtonDisks(DiskLeftPanel);
             textBox1.Text = Settings.Default.LeftPath;
             textBox2.Text = Settings.Default.RightPath;
+            splitContainer1.SplitterDistance = Settings.Default.SplitDistatnce;
             Location = Settings.Default.WinLocation;
             Size = Settings.Default.WinSize;
         }
@@ -209,7 +210,7 @@ namespace File_Explorer_v2
 
             try
             {
-                if (Path.GetExtension(leftChangedPath) == "")
+                if (Directory.Exists(leftChangedPath))
                 {
                     Fill_listviewFolders(leftChangedPath, listView_left);
                     Fill_listviewFiles(leftChangedPath, listView_left);
@@ -237,7 +238,7 @@ namespace File_Explorer_v2
             Settings.Default.RightPath = rigthChangedPath;
             try
             {
-                if (Path.GetExtension(rigthChangedPath) == "")
+                if (Directory.Exists(rigthChangedPath))
                 {
                     Fill_listviewFolders(rigthChangedPath, listView_right);
                     Fill_listviewFiles(rigthChangedPath, listView_right);
@@ -264,7 +265,7 @@ namespace File_Explorer_v2
                 if (ActiveListViewLeft)
                 {
                     ToDir = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName);
-                    if (Path.GetExtension(FromDir) == "")
+                    if (Directory.Exists(FromDir))
                     {
                         Directory.Move(FromDir, ToDir);
                     }
@@ -280,7 +281,7 @@ namespace File_Explorer_v2
                 {
                     if (!ActiveListViewRight) return;
                     ToDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
-                    if (Path.GetExtension(FromDir) == "")
+                    if (Directory.Exists(FromDir))
                     {
                         Directory.Move(FromDir, ToDir);
                     }
@@ -305,7 +306,7 @@ namespace File_Explorer_v2
             {
                 FileName = listView_left.FocusedItem.Text;
                 FromDir = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName);
-                if (Path.GetExtension(FromDir) == "")
+                if (Directory.Exists(FromDir))
                 {
                     Directory.Delete(FromDir, true);
                 }
@@ -321,7 +322,7 @@ namespace File_Explorer_v2
                 if (!ActiveListViewRight) return;
                 FileName = listView_right.FocusedItem.Text;
                 FromDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
-                if (Path.GetExtension(FromDir) == "")
+                if (Directory.Exists(FromDir))
                 {
                     Directory.Delete(FromDir, true);
                 }
@@ -341,7 +342,7 @@ namespace File_Explorer_v2
                 ToDir = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName);
                 try
                 {
-                    if (Path.GetExtension(FromDir) == "")
+                    if (Directory.Exists(FromDir))
                     {
                         CopyDir(FromDir, ToDir);
                     }
@@ -363,7 +364,7 @@ namespace File_Explorer_v2
                 ToDir = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
                 try
                 {
-                    if (Path.GetExtension(FromDir) == "")
+                    if (Directory.Exists(FromDir))
                     {
                         CopyDir(FromDir, ToDir);
                     }
@@ -439,6 +440,12 @@ namespace File_Explorer_v2
         private void button_create_Click(object sender, EventArgs e) //Создание папки через новую форму
         {
             var newFolder = new CreateFolder();
+            newFolder.Load += delegate
+            {
+                newFolder.Location = new Point(Settings.Default.WinLocation.X + (Settings.Default.WinSize.Width/2) ,Settings.Default.WinLocation.Y + Settings.Default.WinSize.Height/2);
+                
+            };
+            
             newFolder.Show();
             newFolder.FormClosing += (senderr, eventArgs) => //Выполнение действия после закрытия формы
             {
@@ -458,7 +465,7 @@ namespace File_Explorer_v2
             };
         }
 
-        private void TotalCommander_KeyDown(object sender, KeyEventArgs e)
+        private void TotalCommander_KeyDown(object sender, KeyEventArgs e) //Обработчик нажатия кнопок клавиатуры
         {
             switch (e.KeyCode)
             {
@@ -490,12 +497,13 @@ namespace File_Explorer_v2
             }
         }
 
-        private void TotalCommander_FormClosing(object sender, FormClosingEventArgs e)
+        private void TotalCommander_FormClosing(object sender, FormClosingEventArgs e) //Закрытие формы, сохранение всех параметров
         {
             iniFile.LeftPathIni = Settings.Default.LeftPath;
             iniFile.RightPathIni = Settings.Default.RightPath;
+            //iniFile.SplitDistance = splitContainer1.SplitterDistance;
             iniFile.SaveIniFile();
-
+            Settings.Default.SplitDistatnce += splitContainer1.SplitterDistance;
             Settings.Default.WinLocation = Location;
             if (WindowState == FormWindowState.Normal)
             {
@@ -513,15 +521,15 @@ namespace File_Explorer_v2
         {
             if (e.Data.GetDataPresent(typeof(List<ListViewItem>)))
             {
-                var items = (List<ListViewItem>) e.Data.GetData(typeof(List<ListViewItem>));
-                foreach (ListViewItem lvi in items)
+                var items = (List<ListViewItem>) e.Data.GetData(typeof(List<ListViewItem>)); //Список элементов и их пути
+                foreach (ListViewItem lvi in items) //Для каждого элемента
                 {
-                    var FileName = lvi.Text;
-                    var PathTo = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName);
+                    var FileName = lvi.Text; //Имя
+                    var PathTo = Build.PrepareLocalPath(Settings.Default.LeftPath, FileName); //Директории
                     var PathFrom = Build.PrepareLocalPath(Settings.Default.RightPath, FileName);
-                    if (Path.GetExtension(PathTo) == "")
+                    if (Path.GetExtension(PathTo) == "") //Проверка на расширение (пака\файл)
                     {
-                        try
+                        try //Копирование папки
                         {
                             CopyDir(PathFrom, PathTo);
                             Directory.Delete(PathFrom, true);
@@ -530,7 +538,7 @@ namespace File_Explorer_v2
                         {
                         }
                     }
-                    else
+                    else //Копирование файла
                     {
                         try
                         {
@@ -623,6 +631,27 @@ namespace File_Explorer_v2
             {
                 e.Effect = DragDropEffects.Move;
             }
+        }
+
+        private void TotalCommander_Resize(object sender, EventArgs e)
+        {
+            //splitContainer1.Width = ClientRectangle.Width;
+            int x = (ClientRectangle.Width - 7 * 5) / 6;
+            button_copy.Width = x;
+            button_copy.Left = 10;
+            button_create.Width = x;
+            button_create.Left =4*(x + 10) + 10;
+            button_delete.Width = x;
+            button_delete.Left = 3 * (x + 10) + 10;
+            button_move.Width = x;
+            button_move.Left = 2 * (x + 10) + 10;
+            button_paste.Width = x;
+            button_paste.Left = (x + 10) + 10;
+        }
+
+        private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)
+        {
+            //Settings.Default.SplitDistatnce = splitContainer1.SplitterDistance;
         }
     }
 
